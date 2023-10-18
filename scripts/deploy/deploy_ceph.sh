@@ -135,7 +135,7 @@ echo "[3] initializng Ceph config"
 ceph-deploy new $MON_LIST
 
 echo "[4] installing Ceph packages on all the hosts"
-ceph-deploy install --release octopus $MON_LIST $OSD_LIST $MDS_LIST $MGR_LIST
+ceph-deploy install --release quincy $MON_LIST $OSD_LIST $MDS_LIST $MGR_LIST
 
 echo "[5] deploying MONs"
 ceph-deploy mon create-initial
@@ -147,6 +147,7 @@ ceph-deploy mgr create $MGR_LIST
 # update the Ceph config to allow pool deletion and to recognize object class libs.
 cat >> ceph.conf << EOF
 mon allow pool delete = true
+mon_allow_pool_size_one = true
 osd class load list = *
 osd op threads = 8
 EOF
@@ -183,9 +184,8 @@ ceph osd pool create cephfs_metadata 16
 ceph osd pool set cephfs_data pg_autoscale_mode off
 
 # set the pool sizes based on commandline arguments
-ceph osd pool set cephfs_data size $POOL_SIZE
-ceph osd pool set cephfs_metadata size $POOL_SIZE
-ceph osd pool set device_health_metrics size $POOL_SIZE
+ceph osd pool set cephfs_data size $POOL_SIZE --yes-i-really-mean-it
+ceph osd pool set cephfs_metadata size $POOL_SIZE --yes-i-really-mean-it
 
 echo "[9] deploying CephFS"
 ceph fs new cephfs cephfs_metadata cephfs_data
